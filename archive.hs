@@ -11,6 +11,7 @@
 module Main where
 
 import System.Directory
+import System.FilePath ((</>))
 import System.Environment (getArgs)
 import Control.Monad (guard,filterM)
 import Data.List (subsequences)
@@ -27,18 +28,15 @@ makeDayDir day = createDirectoryIfMissing True (dayDir day)
 containsDay :: String -> String -> Bool
 containsDay day file = day `elem` subsequences file 
 
+-- Builds up a list of pairs of ids and lists of matching files, and then
+-- creates directories and moves files to them accordingly
 main :: IO ()
 main = do
     args <- getArgs
     case args of 
       [] -> putStrLn "Usage: archive [id_strings]"
       _  -> do
-          -- List of all non-directory files
           files <- filterM doesFileExist =<< listDirectory "."
-          -- list of (key,value) pairs where key == id string, and value == list of
-          -- files in current directory that contain that id string
           let archives = [(day,file) | day <- args, file <- files, containsDay day file]
-          -- Actually make the directories and move the files to those directories, as
-          -- specified by archives
           mapM makeDayDir args
-          mapM_ (\(day,file) -> renamePath file (dayDir day ++ "\\" ++ file)) archives
+          mapM_ (\(day,file) -> renamePath file (dayDir day </> file)) archives

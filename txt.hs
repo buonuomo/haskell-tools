@@ -23,7 +23,5 @@ replaceHs = reverse . ("txt" ++) . drop 2 . reverse
 -- Execution of the copying procedure in the current directory
 main = do 
     ls <- listDirectory "."
-    -- makes (key,value) pairs for files in current directory, where key == .hs
-    -- file, and value == .txt file with same name
     let txts = [(orig,txt) | orig <- ls, isHask orig, let txt = replaceHs orig]
     mapM_ (uncurry copyFile) txts   
